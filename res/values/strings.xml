@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TreX</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="add_new_expense">Add New Expense</string>
+    <string name="view_categorized_expense">View Categorized Expenses</string>
+    <string name="settings">Settings</string>
+    <string name="add_new_category">Add New Category</string>
+    <string name="expense_tag">Expense Tag</string>
+    <string name="amount">Amount</string>
+    <string name="send_mail">Send Mail</string>
+    <string name="set_email">Register Email</string>
+
+</resources>
