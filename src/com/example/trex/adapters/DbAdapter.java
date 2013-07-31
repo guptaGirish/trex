@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DbAdapter {
 	
@@ -34,29 +35,40 @@ public class DbAdapter {
     private DatabaseHelper DBHelper;
     private SQLiteDatabase db;
 
+    private String TAG = "DbAdapter" ;
     /**
      * Constructor
      * @param ctx
      */
     public DbAdapter(Context ctx)
     {
+    	
         this.context = ctx;
         this.DBHelper = new DatabaseHelper(this.context);
+        Log.v(TAG, "In DbAdapter Constructor") ;
     }
 
+    
+    
+    
     private static class DatabaseHelper extends SQLiteOpenHelper 
     {
+    	private String TAG = "DatabaseHelper" ; 
         DatabaseHelper(Context context) 
         {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
+            Log.v(TAG, "In Constructor") ;
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) 
         {
             db.execSQL(CREATE_TABLE_CATEGORIES);
+            Log.v(TAG, "Categories table created") ;
             db.execSQL(CREATE_TABLE_EXPENSES);
-            db.execSQL(CREATE_TABLE_UNREVIEWED_EXPENSES);           
+            Log.v(TAG, "expense table created") ;
+            db.execSQL(CREATE_TABLE_UNREVIEWED_EXPENSES);
+            Log.v(TAG, "unreviewed table created") ;
         }
 
         @Override
@@ -76,6 +88,7 @@ public class DbAdapter {
     public DbAdapter open() throws SQLException 
     {
         this.db = this.DBHelper.getWritableDatabase();
+        Log.v(TAG, "Database opened") ;
         return this;
     }
 
@@ -86,6 +99,7 @@ public class DbAdapter {
     public void close() 
     {
         this.DBHelper.close();
+        Log.v(TAG, "Database closed") ;
     }
 	
 	

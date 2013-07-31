@@ -1,25 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+     >
 
+    
+    
     <TextView
-        android:id="@+id/expenseF"
+        android:id="@+id/expense_F"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:text="" />
 
     <TextView
-        android:id="@+id/amountF"
-        android:layout_width="wrap_content"
+        android:id="@+id/amount_F"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="Amount"
+        android:layout_toRightOf="@+id/expense_F"
+         />
 
     <Button
-        android:id="@+id/settle"
+        android:id="@+id/settle_F"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="S" />
+        android:text="S"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+         />
+    
+    <TextView
+        android:id="@+id/time_stamp_F"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_alignParentBottom="true"
+        
+         />
+    
+    <TextView
+        android:id="@+id/expense_id_F"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"
+        android:text="" />
+    <TextView
+        android:id="@+id/row_position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible"
+        android:text="" />
+    
 
-</LinearLayout>
+</RelativeLayout>

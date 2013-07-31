@@ -12,5 +12,8 @@
     <string name="amount">Amount</string>
     <string name="send_mail">Send Mail</string>
     <string name="set_email">Register Email</string>
+    <string name="new_category_name">Enter New Category Name</string>
+    <string name="add_category">Add</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

@@ -11,7 +11,7 @@
         android:text="" />
 
     <Spinner
-        android:id="@+id/choosedCategory"
+        android:id="@+id/choosed_Category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -28,7 +28,7 @@
         android:text="@string/expense_tag" />
 
     <EditText
-        android:id="@+id/expenseContent"
+        android:id="@+id/expense_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -44,16 +44,16 @@
         android:text="@string/amount" />
 
     <EditText
-        android:id="@+id/amountExpense"
+        android:id="@+id/amount_expense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPostalAddress" />
 
     <Button
-        android:id="@+id/commitExpense"
+        android:id="@+id/commit_expense"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="Commit" />
 
 </LinearLayout>
