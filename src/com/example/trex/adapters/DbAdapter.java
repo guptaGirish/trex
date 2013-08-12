@@ -9,7 +9,7 @@ import android.util.Log;
 public class DbAdapter {
 	
 	
-	public static final String DATABASE_NAME = "trex";
+	public static final String DATABASE_NAME = "trex1";
 
     public static final int DATABASE_VERSION = 1;
 
@@ -18,7 +18,8 @@ public class DbAdapter {
     + ExpenseDbAdapter.ETAG+ " TEXT NOT NULL," 
     + ExpenseDbAdapter.AMOUNT+ " REAL NOT NULL," 
     + ExpenseDbAdapter.CATEGORY_ID + " INTEGER NOT NULL, "
-    + ExpenseDbAdapter.TIME_STAMP+ " INTEGER NOT NULL" + ");"; 
+    + ExpenseDbAdapter.TIME_STAMP+ " INTEGER NOT NULL, " 
+    + ExpenseDbAdapter.FLAG + " INTEGER NOT NULL " + ");"; 
 
     private static final String CREATE_TABLE_UNREVIEWED_EXPENSES = "create table unreviewed_expenses"
     +"(_id integer primary key autoincrement NOT NULL, " 
@@ -75,6 +76,7 @@ public class DbAdapter {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, 
         int newVersion) 
         {               
+        	
             // Adding any table mods to this guy here
         }
     } 

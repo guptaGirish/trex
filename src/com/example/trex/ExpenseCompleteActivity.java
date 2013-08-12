@@ -16,6 +16,7 @@ import android.text.AndroidCharacter;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -30,18 +31,21 @@ public class ExpenseCompleteActivity extends Activity{
 	TextView pageHeader ;
     Spinner choosedCategory ;
     static int GET_CATEGORY_CODE = 2 ;
-	
+	private String PAGE_HEADER = "page header" ;
 	private String EDIT_HEADER = "Complete Your Expense" ;
 	private String ADD_NEW_HEADER = "Add New Expnese" ;
-    
+    private String CATEGORY_LIST = "category_list" ;
+    private String CATEGORY_OBJECT_LIST = "category_object_list" ;
     public static String ACTION = "operation" ;
     public static String EDIT_ACTION = "complete_expense" ;
     public static String ADD_NEW_ACTION = "add_new_expense" ;
     public static String EXPENSE_TAG = "expense_tag" ;
     public static String EXPENSE_AMOUNT = "expense_amount" ;
+    private static String POSITION_SPINNER = "position_spinner" ;
     public static String TIME_STAMP = "timestamp" ;
     public static String EXPENSE_ID = "id" ;
-    public static String POSITION_LIST = "position" ;
+    public static String POSITION_LIST = "position" ; // position of passed Unreviewed expense
+     											      //in Unreviewed Expense List
     //public static String EXPENSE_TAG = "empense_tag" ;
     //public static String AMOUNT = "amount" ;
     ArrayList<CategoryObject> colist ;
@@ -50,56 +54,106 @@ public class ExpenseCompleteActivity extends Activity{
     long timeStamp = -1;
     int tagId = -1 ;
 	int pos = -1 ;
+	int posSpinner = -1 ;
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		
 		
 		Log.v(TAG,"In onCreate");
 		setContentView(R.layout.actvity_expense_complete);
 		
 		initializeControls();
 		
-		populateCategorySpinner();
-		
-		Intent i = getIntent();
-		String action = i.getStringExtra(ACTION);
-		
-		if(action.equals(EDIT_ACTION))
+		if(savedInstanceState != null)
 		{
-			pageHeader.setText(EDIT_HEADER);
+			pageHeader.setText(savedInstanceState.getString(PAGE_HEADER)) ;	
+			timeStamp = Long.parseLong(savedInstanceState.getString(TIME_STAMP));
+			expenseContent.setText(savedInstanceState.getString(EXPENSE_TAG)) ;
+			amountExpense.setText(savedInstanceState.getString(EXPENSE_AMOUNT)) ;
 			
-			String etag = i.getStringExtra(EXPENSE_TAG);
-			String amt = i.getStringExtra(EXPENSE_AMOUNT) ;
-			timeStamp = Long.parseLong(i.getStringExtra(TIME_STAMP));
-			expenseContent.setText(etag) ;
-			amountExpense.setText(amt) ;
-			tagId = Integer.parseInt(i.getStringExtra(EXPENSE_ID));
-			pos = Integer.parseInt(i.getStringExtra(POSITION_LIST));
+			tagId = Integer.parseInt(savedInstanceState.getString(EXPENSE_ID)) ;
+			
+			posSpinner = Integer.parseInt(savedInstanceState.getString(POSITION_SPINNER));
+			
+			clist = (ArrayList<String>)savedInstanceState.getStringArrayList(CATEGORY_LIST) ;
+			colist = savedInstanceState.getParcelableArrayList(CATEGORY_OBJECT_LIST);
+			pos = Integer.parseInt(savedInstanceState.getString(POSITION_LIST)) ;
 			
 		}
 		else
 		{
-			pageHeader.setText(ADD_NEW_HEADER) ;
-			
-			
+			Intent i = getIntent();
+			String action = i.getStringExtra(ACTION);
+		
+				if(action.equals(EDIT_ACTION))
+				{
+					pageHeader.setText(EDIT_HEADER);
+					
+					String etag = i.getStringExtra(EXPENSE_TAG);
+					String amt = i.getStringExtra(EXPENSE_AMOUNT) ;
+					timeStamp = Long.parseLong(i.getStringExtra(TIME_STAMP));
+					expenseContent.setText(etag) ;
+					amountExpense.setText(amt) ;
+					tagId = Integer.parseInt(i.getStringExtra(EXPENSE_ID));
+					pos = Integer.parseInt(i.getStringExtra(POSITION_LIST));
+					
+				}
+				else
+				{
+					pageHeader.setText(ADD_NEW_HEADER) ;
+					
+					
+				}
+		
+				Log.v(TAG,"");
+				
+		
 		}
-		
-		Log.v(TAG,"");
-		
-		
-		
-		populateCategorySpinner() ;
+		populateCategorySpinner(this.posSpinner) ;
 		
 	}
 	
 	
-	private void populateCategorySpinner() {
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
 		// TODO Auto-generated method stub
-		developCategoryList();
+		outState.putString(PAGE_HEADER, pageHeader.getText().toString());
+		outState.putString(EXPENSE_ID, ""+tagId) ;
+		outState.putString(EXPENSE_TAG, expenseContent.getText().toString()) ;
+		outState.putString(EXPENSE_AMOUNT, amountExpense.getText().toString()) ;
+		outState.putString(POSITION_SPINNER, ""+choosedCategory.getSelectedItemPosition());
+		outState.putString(TIME_STAMP, ""+timeStamp) ;
 		
+		outState.putStringArrayList(CATEGORY_LIST, clist) ;
+		outState.putParcelableArrayList(CATEGORY_OBJECT_LIST, colist) ;
+		outState.putString(POSITION_LIST, ""+pos) ;
+		super.onSaveInstanceState(outState);
+		
+		
+		
+	}
+
+
+
+	private void populateCategorySpinner(int posSpinner) {
+		// TODO Auto-generated method stub
+		if(posSpinner != -1)
+		{
+			cap = new CategoryArrayAdapter(this, android.R.layout.simple_list_item_1, clist);
+			cap.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+			choosedCategory.setAdapter(cap);
+			choosedCategory.setSelection(posSpinner) ;
+		}
+		else
+		{
+		developCategoryList();
 		cap = new CategoryArrayAdapter(this, android.R.layout.simple_list_item_1, clist);
 		cap.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
 		choosedCategory.setAdapter(cap);
+		}
+		
 		
 	}
 	
@@ -117,7 +171,7 @@ public class ExpenseCompleteActivity extends Activity{
 		 
 		 
 		 
-		addNewCategory.setOnClickListener(new  View.OnClickListener() {
+		 addNewCategory.setOnClickListener(new  View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -139,18 +193,17 @@ public class ExpenseCompleteActivity extends Activity{
 				
 				
 				
-					int posSpinner = choosedCategory.getSelectedItemPosition() ;
+					posSpinner = choosedCategory.getSelectedItemPosition() ;
 					int cId = colist.get(posSpinner).getCategoryId() ;
 					String cName = colist.get(posSpinner).getCategoryName() ;
-					Log.v(TAG,"On commit, Category id is - "+cId+" , Category Name is - "+cName) ;
-					
+					Log.v(TAG,"On commit, Category id is - "+cId+" , Category Name is - "+cName) ;			
 					String expenseTag = expenseContent.getText().toString() ;
-					float expenseAmt = Float.parseFloat(amountExpense.getText().toString()) ;
+					Log.v(TAG,"On commit, Expense amount is " +amountExpense.getText().toString()) ;
 					
+					String eAmt  = amountExpense.getText().toString().trim() ;
+					float expenseAmt = Float.parseFloat(eAmt) ;
 					
-					
-					
-					
+									
 					ExpenseDbAdapter edb = new ExpenseDbAdapter(ExpenseCompleteActivity.this) ;
 					edb.open();
 						if(timeStamp == -1){
@@ -220,6 +273,7 @@ public class ExpenseCompleteActivity extends Activity{
 		{
 			if(resultCode == RESULT_OK)
 			{
+				
 				String cname = data.getStringExtra(AddNewCategoryActivity.CATEGORY_NAME);
 				//pageHeader.setText(cname) ;
 				if(cname.length()>0)
@@ -244,14 +298,34 @@ public class ExpenseCompleteActivity extends Activity{
 
 	private void ModifyCategoryList(String cname) {
 		// TODO Auto-generated method stub
-		CategoryObject cob = colist.get(colist.size()-1) ;
-		int id = cob.getCategoryId() + 1 ;
-		clist.add(cname) ;
-		
-		colist.add(new CategoryObject(id, cname));
-		cap.notifyDataSetChanged();
-		
-		
+		if(colist.size() >=1 )
+		{
+			
+			CategoryObject cob = colist.get(colist.size()-1) ;
+			int id = cob.getCategoryId() + 1 ;
+			clist.add(cname) ;
+			
+			colist.add(new CategoryObject(id, cname));
+			cap.notifyDataSetChanged();
+			int s = colist.size();
+			//choosedCategory.setSelection(choosedCategory.getLastVisiblePosition()) ;
+			choosedCategory.setSelection(s-1) ;
+		}
+		else if(colist.size() == 0 )
+		{
+			CategoryDbAdapter cdb = new CategoryDbAdapter(this) ;
+			cdb.open() ;
+			  Cursor c = cdb.fetchAllCategories() ;
+			  c.moveToFirst() ;
+			  int cid = c.getInt(0);
+			  cdb.close() ;
+			  
+			  colist.add(new CategoryObject(cid, cname));
+			  clist.add(cname) ;
+			  cap.notifyDataSetChanged() ;
+			  
+			  
+		}
 		
 	}
 

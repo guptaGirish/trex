@@ -30,19 +30,17 @@ public class AddNewCategoryActivity extends Activity {
 		addCategory = (Button)findViewById(R.id.add_category);
 		cancel  = (Button)findViewById(R.id.cancel);
 		
-		addCategory.setOnClickListener(new View.OnClickListener() {
-			
+		
+		addCategory.setOnClickListener(new View.OnClickListener() {	
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-			// createPendingResult(requestCode, se, flags)
 				String categoryName = newCategoryName.getText().toString() ;
 				Intent i = new Intent() ;
 				i.putExtra(CATEGORY_NAME, categoryName) ;
-			 //setResult(ExpenseCompleteActivity.GET_CATEGORY_CODE, i);
 				setResult(Activity.RESULT_OK, i);
-			 finish();
-			 //finishActivity(ExpenseCompleteActivity.GET_CATEGORY_CODE) ;
+				finish();
+			 
 			}
 		});
 		

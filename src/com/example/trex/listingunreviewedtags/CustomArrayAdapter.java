@@ -111,7 +111,7 @@ public class CustomArrayAdapter extends ArrayAdapter<UnreviewedTagObject>{
 		eTagHolder.expenseTag.setText(uob.getTag());
 		String amount = getAmount(uob.getTag());
 		if(amount.length() > 0) eTagHolder.amount.setText(amount);
-		else eTagHolder.amount.setText("\u200b");
+		else eTagHolder.amount.setText("");
 		long timeStamp = uob.getTimeStamp() ;
 		eTagHolder.timeStamp.setText(""+timeStamp) ;
 		TimeZone tz = TimeZone.getDefault() ;

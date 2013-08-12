@@ -47,6 +47,17 @@ public class CategoryListingActivity extends Activity{
 	
 	private void populateList() {
 		// TODO Auto-generated method stub
+		
+		fillArrayList() ;
+		Log.v(TAG,"In populateList, After building ArrayList");
+		cad = new CategoryArrayAdapter(CategoryListingActivity.this, R.layout.layout_category_row, clist);
+		listCategory.setAdapter(cad);
+		
+		
+	}
+	
+	void fillArrayList()
+	{
 		CategoryDbAdapter cdb = new CategoryDbAdapter(this);
 		cdb.open();
 		Cursor c = cdb.fetchAllCategories() ;
@@ -55,7 +66,7 @@ public class CategoryListingActivity extends Activity{
 		{
 			if(c.getCount() > 0 )
 			{
-				Log.v(TAG,"In populateList, starting buiding ArrayList");
+				Log.v(TAG,"In fillArrayList, starting buiding ArrayList");
 				c.moveToFirst() ;
 				do{
 					int id = c.getInt(0) ;
@@ -71,10 +82,6 @@ public class CategoryListingActivity extends Activity{
 		}
 		cdb.close() ;
 		c.close();
-		Log.v(TAG,"In populateList, After building ArrayList");
-		cad = new CategoryArrayAdapter(CategoryListingActivity.this, R.layout.layout_category_row, clist);
-		listCategory.setAdapter(cad);
-		
 		
 	}
 	
@@ -113,6 +120,8 @@ class CategoryHolder
 }
 
 
+
+
 class CategoryArrayAdapter extends ArrayAdapter<CategoryObject> 
 {
 	String TAG = "CategoryArrayAdapter" ;
@@ -129,6 +138,7 @@ class CategoryArrayAdapter extends ArrayAdapter<CategoryObject>
 		rowLayoutId = textViewResourceId ;
 		list = objects ;
 	}
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// TODO Auto-generated method stub
@@ -189,12 +199,6 @@ class CategoryArrayAdapter extends ArrayAdapter<CategoryObject>
 		});
 			
 		
-		/*
-		eTagHolder.title.setText(lo.getTitle());
-		eTagHolder.description.setText(lo.getDescription());
-		dHolder.nid.setText(lo.getnid());
-		dHolder.imageURL.setText(lo.getImageURL());
-		*/
 		Log.v(TAG,"In getView. Line "+9 );
 		
 		

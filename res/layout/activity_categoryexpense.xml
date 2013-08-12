@@ -17,21 +17,30 @@
    
 
         <ListView
-        android:id="@+id/expense_list"
+        android:id="@+id/us_expense_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/category_name"
         
          >
     </ListView>
-            
+    
+        
+            <ListView
+        android:id="@+id/s_expense_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/us_expense_list"
+        
+         >
+    </ListView>
             
    
     <Button
         android:id="@+id/send_mail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/expense_list"
+        android:layout_below="@+id/s_expense_list"
         android:text="@string/send_mail" />
 
 </RelativeLayout>

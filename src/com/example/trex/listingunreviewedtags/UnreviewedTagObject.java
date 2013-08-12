@@ -1,6 +1,8 @@
 package com.example.trex.listingunreviewedtags;
 
-public class UnreviewedTagObject {
+import android.support.v4.os.ParcelableCompat;
+
+public class UnreviewedTagObject  {
 	
 	private String TAG = "UnreviewedTagObject";
 	

@@ -72,6 +72,18 @@ public class HomePageActivity extends Activity  {
 		// TODO Auto-generated method stub
 		
 		Log.v(TAG,"In populateTagList");
+		
+		developTagListArray() ;
+		cad = new CustomArrayAdapter(this, R.layout.layout_tagged_expense, list);
+		tagList.setAdapter(cad);
+		
+		
+		
+	}
+	
+	
+	void developTagListArray()
+	{
 		UnreviewedExpenseDbAdapter udb = new UnreviewedExpenseDbAdapter(HomePageActivity.this);
 		udb.open();
 		Cursor c = udb.fetchAllExpensesTags();
@@ -100,12 +112,9 @@ public class HomePageActivity extends Activity  {
 		}
 		
 		
-		cad = new CustomArrayAdapter(this, R.layout.layout_tagged_expense, list);
-		tagList.setAdapter(cad);
-		
-		
-		
 	}
+	
+	
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

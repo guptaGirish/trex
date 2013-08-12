@@ -15,7 +15,7 @@ public class CategoryDbAdapter {
 	static String NAME = "cname" ;
 	
 	private String TAG = "CategoryDbAdapter";
-    private static final String DATABASE_NAME = "trex";
+    private static final String DATABASE_NAME = "trex1";
     private static final String DATABASE_TABLE = "categories";
     private static final int DATABASE_VERSION = 1;
 

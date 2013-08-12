@@ -10,14 +10,15 @@ import android.util.Log;
 
 public class ExpenseDbAdapter {
 	
-	static String ETAG = "tag" ;
-	static String AMOUNT = "amount" ;
-	static String CATEGORY_ID = "cat_id" ;
-	static String TIME_STAMP = "timestamp" ;
+	public static String ETAG = "tag" ;
+	public static String AMOUNT = "amount" ;
+	public static String CATEGORY_ID = "cat_id" ;
+	public static String TIME_STAMP = "timestamp" ;
+	public static String FLAG = "settle_flag" ;  // 0 for unsettled(default), 1 for settled
 	
 
     private String TAG = "ExpenseDbAdapter";
-    private static final String DATABASE_NAME = "trex";
+    private static final String DATABASE_NAME = "trex1";
     private static final String DATABASE_TABLE = "expenses";
     private static final int DATABASE_VERSION = 1;
 
@@ -75,13 +76,15 @@ public class ExpenseDbAdapter {
 
     public long insertExpense(String expenseTag, float expenseAmount,int catId,long timeStamp )
     {
+    	int settle_flag = 0 ;
+    	
     	Log.v(TAG, "In insertExpense") ;
     	ContentValues initialValues = new ContentValues() ;
     	initialValues.put(ETAG, expenseTag);
     	initialValues.put(AMOUNT, expenseAmount) ;
     	initialValues.put(CATEGORY_ID, catId);
     	initialValues.put(TIME_STAMP, timeStamp) ;
-    	
+    	initialValues.put(FLAG,settle_flag);
     	
 		return this.mDb.insert(DATABASE_TABLE, null, initialValues);
     	
@@ -99,10 +102,10 @@ public class ExpenseDbAdapter {
 
     	Log.v(TAG, "In fetchAllExpenses") ;
         Cursor mCursor = this.mDb.query(DATABASE_TABLE, new String[] { "_id",
-                ETAG,AMOUNT,CATEGORY_ID,TIME_STAMP}, CATEGORY_ID + "="+ cat_id, null, null, null, null);
+                ETAG,AMOUNT,CATEGORY_ID,TIME_STAMP,FLAG}, CATEGORY_ID + "="+ cat_id, null, null, null, null);
         return mCursor ;
     }
-
+    
 
     public boolean updateExpense(int ExpenseId, ContentValues updatedValues)
     {
@@ -110,6 +113,8 @@ public class ExpenseDbAdapter {
     	return this.mDb.update(DATABASE_TABLE, updatedValues,"_id ="+ ExpenseId , null) > 0 ;
     	
     }
+    
+    
     
     
     /*

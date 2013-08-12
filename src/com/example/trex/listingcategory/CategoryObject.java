@@ -1,6 +1,9 @@
 package com.example.trex.listingcategory;
 
-public class CategoryObject {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class CategoryObject implements Parcelable {
 	int id ;
 	String cname ;
 	public CategoryObject(int id, String cname) {
@@ -16,6 +19,18 @@ public class CategoryObject {
 	public String getCategoryName()
 	{
 		return cname;
+	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 

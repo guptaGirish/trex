@@ -5,9 +5,9 @@ import android.widget.TextView;
 
 public class ExpenseHolder {
 
-	TextView eid, ename,eamount,etimestamp, rowposition ;
+	TextView eid, ename,eamount,etimestamp, rowposition, timeStampLong ;
 	
-	Button settle;
+	Button settle, edit;
 	
 	
 }
