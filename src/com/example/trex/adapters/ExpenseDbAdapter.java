@@ -98,6 +98,14 @@ public class ExpenseDbAdapter {
     }
 
 
+    public boolean deleteExpenseWithCAT( long catId)
+    {
+    	Log.v(TAG, "In deleteExpense") ;
+    	return this.mDb.delete(DATABASE_TABLE, CATEGORY_ID + "="+catId , null) > 0 ;
+    	
+    }
+    
+    
     public Cursor fetchAllExpenses(int cat_id) {
 
     	Log.v(TAG, "In fetchAllExpenses") ;
@@ -107,6 +115,8 @@ public class ExpenseDbAdapter {
     }
     
 
+    
+    
     public boolean updateExpense(int ExpenseId, ContentValues updatedValues)
     {
     	Log.v(TAG, "In updateExpense") ;

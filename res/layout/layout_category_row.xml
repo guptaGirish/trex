@@ -21,6 +21,17 @@
         android:layout_alignParentLeft="true"
          />
 
+    
+    <Button
+        android:id="@+id/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop = "true"
+        android:layout_toLeftOf="@+id/expend"
+        android:text="D"
+		
+         />
+    
     <Button
         android:id="@+id/expend"
         android:layout_width="wrap_content"
@@ -31,4 +42,13 @@
 		
          />
 
+    <TextView
+        android:id="@+id/pos_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+         />
+    
 </RelativeLayout>

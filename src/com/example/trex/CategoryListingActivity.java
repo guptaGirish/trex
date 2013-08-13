@@ -11,7 +11,9 @@ import com.example.trex.adapters.CategoryDbAdapter;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CategoryListingActivity extends Activity{
 
@@ -116,7 +119,9 @@ class CategoryHolder
 {
 	TextView cId ;
 	TextView cName ;
+	TextView cPos ;
 	Button expend ;
+	Button delete ;
 }
 
 
@@ -160,7 +165,9 @@ class CategoryArrayAdapter extends ArrayAdapter<CategoryObject>
 			
 			cHolder.cName = (TextView)row.findViewById(R.id.name_category) ;
 			cHolder.expend = (Button)row.findViewById(R.id.expend) ;
-			cHolder.cId = (TextView)row.findViewById(R.id.id_category);
+			cHolder.cId = (TextView)row.findViewById(R.id.id_category) ;
+			cHolder.delete = (Button)row.findViewById(R.id.delete) ;
+			cHolder.cPos = (TextView)row.findViewById(R.id.pos_list) ;
 			Log.v(TAG,"In getView. Line "+4 );
 			row.setTag(cHolder);
 			Log.v(TAG,"In getView. Line "+5 );
@@ -177,9 +184,66 @@ class CategoryArrayAdapter extends ArrayAdapter<CategoryObject>
 		
 		Log.v(TAG,"In getView. Line "+8 + cob.getName());
 		
-		
+		cHolder.cPos.setText(""+position) ;
 		cHolder.cName.setText(cob.getName());
 		cHolder.cId.setText(""+cob.getId());
+		
+		cHolder.delete.setOnClickListener(new View.OnClickListener() {
+			
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+				RelativeLayout r = (RelativeLayout)v.getParent() ;
+				final TextView cId = (TextView)r.getChildAt(0) ;
+				final TextView cName = (TextView)r.getChildAt(1) ;
+				final TextView cPos = (TextView)r.getChildAt(4) ;
+				
+				DialogInterface.OnClickListener positiveListener = new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						
+						deleteCategory( Integer.parseInt(cId.getText().toString()), cName.getText().toString() ) ;
+						
+						}
+
+							private void deleteCategory(int cId, String cName) {
+							// TODO Auto-generated method stub
+						
+								CategoryDbAdapter cdb = new CategoryDbAdapter(ctx);
+								cdb.open() ;
+								boolean result = cdb.deleteCategory(cId,cName) ;
+								if(result)
+								{
+									int pos = Integer.parseInt(cPos.getText().toString());
+									Log.v(TAG, "In get View, removing category item from postion "+pos );
+									list.remove(pos) ;
+									notifyDataSetChanged();
+									Toast.makeText(ctx, "Category Deleted", Toast.LENGTH_SHORT).show() ;
+								}
+								
+							}
+					} ; 
+				
+				
+				AlertDialog.Builder ab = new AlertDialog.Builder(ctx) ;
+				ab.setTitle("TreX") ;
+				ab.setMessage("Are you sure to delete category "+cName.getText().toString() );
+				ab.setPositiveButton("Yes", positiveListener) ;
+				ab.setNegativeButton("No", null) ;
+				ab.show() ;					
+				
+				
+			}
+			
+			
+			
+		}) ;
+		
+		
 		cHolder.expend.setOnClickListener(new View.OnClickListener() {
 			
 			@Override

@@ -33,6 +33,8 @@ public class CategoryDbAdapter {
         DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
             Log.v(TAG, "In Constructor") ;
+            
+           
         }
 
         @Override
@@ -83,10 +85,26 @@ public class CategoryDbAdapter {
     }
 
 
-    public boolean deleteCategory(long cid) {
+    public boolean deleteCategory(long cId, String cName) {
 
     	Log.v(TAG, "In deleteCategory") ;
-        return this.mDb.delete(DATABASE_TABLE, "_id = " + cid, null) > 0; //$NON-NLS-1$
+    	
+    	boolean result = this.mDb.delete(DATABASE_TABLE, "_id = " + cId, null) > 0 ;
+    	
+    	if(result)
+    	{
+    		ExpenseDbAdapter edb = new ExpenseDbAdapter(mCtx) ;
+    		edb.open() ;
+    		boolean r = edb.deleteExpenseWithCAT(cId);
+    		edb.close() ;
+    		return r ;
+    	}
+    	else
+    	{
+    		return false ;
+    	}
+    	
+        //return true; //$NON-NLS-1$
     }
 
 
