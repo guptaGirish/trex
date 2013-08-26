@@ -1,41 +1,57 @@
 package com.example.trex;
 
 import java.util.ArrayList;
-
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
 import com.example.trex.adapters.CategoryDbAdapter;
 import com.example.trex.adapters.ExpenseDbAdapter;
 import com.example.trex.adapters.UnreviewedExpenseDbAdapter;
 import com.example.trex.listingcategory.CategoryArrayAdapter;
 import com.example.trex.listingcategory.CategoryObject;
-
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.AndroidCharacter;
-import android.text.format.Time;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+/*
+ * 
+ * This activity is to complete an already tagged expense
+ * and 
+ * to create an entirely new complete expense 
+ * 
+ * */
 
 public class ExpenseCompleteActivity extends Activity{
 	
-	String TAG = "ExpenseCompleteActivity" ;
+	private String TAG = "ExpenseCompleteActivity" ;
 
-	Button addNewCategory,commitExpense ;
-	EditText expenseContent, amountExpense ;
-	TextView pageHeader ;
-    Spinner choosedCategory ;
+	private Button addNewCategory,commitExpense, expenseDate, expenseTime  ;
+	private EditText expenseContent, amountExpense ;
+	private TextView pageHeader ;
+    private Spinner choosedCategory ;
+
     static int GET_CATEGORY_CODE = 2 ;
-	private String PAGE_HEADER = "page header" ;
+
+    private String PAGE_HEADER = "page header" ;
 	private String EDIT_HEADER = "Complete Your Expense" ;
 	private String ADD_NEW_HEADER = "Add New Expnese" ;
     private String CATEGORY_LIST = "category_list" ;
     private String CATEGORY_OBJECT_LIST = "category_object_list" ;
+    
+    
     public static String ACTION = "operation" ;
     public static String EDIT_ACTION = "complete_expense" ;
     public static String ADD_NEW_ACTION = "add_new_expense" ;
@@ -46,27 +62,31 @@ public class ExpenseCompleteActivity extends Activity{
     public static String EXPENSE_ID = "id" ;
     public static String POSITION_LIST = "position" ; // position of passed Unreviewed expense
      											      //in Unreviewed Expense List
-    //public static String EXPENSE_TAG = "empense_tag" ;
-    //public static String AMOUNT = "amount" ;
-    ArrayList<CategoryObject> colist ;
-    ArrayList<String> clist ;
-    CategoryArrayAdapter cap ;
-    long timeStamp = -1;
-    int tagId = -1 ;
-	int pos = -1 ;
-	int posSpinner = -1 ;
+    private ArrayList<CategoryObject> colist ;
+    private ArrayList<String> clist ;
+    private CategoryArrayAdapter cap ;
+    private long timeStamp ;
+    private int tagId = -1 ;
+	private int pos = -1 ;
+	private int posSpinner = -1 ; // to maintain the position when orientation change occurs
+	private int mYear, mMonth, mDay, mHour, mMinute, mAM_PM ;
+	
+	@Override
+	
+
+
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		
-		
-		Log.v(TAG,"In onCreate");
-		setContentView(R.layout.actvity_expense_complete);
+		//Log.v(TAG,"In onCreate");
+		setContentView(R.layout.activity_expense_complete);
 		
 		initializeControls();
+	 	
 		
-		if(savedInstanceState != null)
-		{
+		
+		if(savedInstanceState != null) //  Extracting values when orientation of devices changes
+		{  
+			
 			pageHeader.setText(savedInstanceState.getString(PAGE_HEADER)) ;	
 			timeStamp = Long.parseLong(savedInstanceState.getString(TIME_STAMP));
 			expenseContent.setText(savedInstanceState.getString(EXPENSE_TAG)) ;
@@ -81,13 +101,14 @@ public class ExpenseCompleteActivity extends Activity{
 			pos = Integer.parseInt(savedInstanceState.getString(POSITION_LIST)) ;
 			
 		}
-		else
+		else // Extracting values of tagged_expense and filling under related views to complete it
 		{
 			Intent i = getIntent();
 			String action = i.getStringExtra(ACTION);
 		
 				if(action.equals(EDIT_ACTION))
 				{
+					
 					pageHeader.setText(EDIT_HEADER);
 					
 					String etag = i.getStringExtra(EXPENSE_TAG);
@@ -99,65 +120,186 @@ public class ExpenseCompleteActivity extends Activity{
 					pos = Integer.parseInt(i.getStringExtra(POSITION_LIST));
 					
 				}
-				else
+				else //If new expense is needed to be added
 				{
 					pageHeader.setText(ADD_NEW_HEADER) ;
 					
-					
+					Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+					timeStamp = c.getTimeInMillis();
+						
 				}
 		
-				Log.v(TAG,"");
+				//Log.v(TAG,"");
 				
 		
 		}
-		populateCategorySpinner(this.posSpinner) ;
+		populateCategorySpinner(this.posSpinner) ; // populate the spinner with all available categories 
+		
+		updateDateValuesWithTimeStamp() ; // Update date String and values - mYear, mMonth, mDay 
+		updateTimeValuesWithTimeStamp() ; // Update time String and values - mHour, mMinute, mAM_PM
+		
 		
 	}
 	
+	
+	/*
+	 * This method is to update values related to Date 
+	 * 
+	 * */
+	
+	
+	private void updateDateValuesWithTimeStamp()
+	{
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		c.setTimeInMillis(timeStamp) ;
+		
+		mYear = c.get(Calendar.YEAR) ;
+		mMonth = c.get(Calendar.MONTH) ;
+		mDay = c.get(Calendar.DAY_OF_MONTH) ;
+		expenseDate.setText(new StringBuilder().append(mDay).append("/").append(mMonth+1).append("/").append(mYear)) ;
+		
+		
+	}
+	/*
+	 * This method is to update values related to Date
+	 * (called from DatePicker Listener's onDateSet() 
+	 * 
+	 * */
+	
+	
+	private void updateDateValuesWithTimeStamp(int year, int month, int day)
+	{
+		
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		mYear = year ;
+		mMonth = month ;
+		mDay = day ;
+		
+		c.set(Calendar.YEAR, mYear) ;
+		c.set(Calendar.MONTH, mMonth) ;
+		c.set(Calendar.DAY_OF_MONTH, mDay) ;
+		c.set(Calendar.HOUR, mHour) ;
+		c.set(Calendar.MINUTE, mMinute) ;
+		c.set(Calendar.AM_PM, mAM_PM) ;
+		
+		timeStamp = c.getTimeInMillis() ;
+		
+		expenseDate.setText(new StringBuilder().append(mDay).append("/").append(mMonth+1).append("/").append(mYear)) ;
+			
+	}
+
+	/*
+	 * This method is to update values related to Date 
+	 * 
+	 * */	
+	private void updateTimeValuesWithTimeStamp()
+	{
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		c.setTimeInMillis(timeStamp) ;
+		
+		mHour = c.get(Calendar.HOUR) ;
+		mMinute = c.get(Calendar.MINUTE) ;
+		mAM_PM = c.get(Calendar.AM_PM) ;
+		
+		
+		
+		
+		if(mAM_PM == 0)
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" AM")) ;
+		else 
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" PM")) ;
+					
+	}
+	/*
+	 * This method is to update values related to Date
+	 * (called from DatePicker Listener's onDateSet() 
+	 * 
+	 * */
+	
+	private void updateTimeValuesWithTimeStamp(int hourofday, int minute)
+	{
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		c.set(Calendar.HOUR_OF_DAY,hourofday) ;
+		
+		mHour = c.get(Calendar.HOUR) ;
+		mMinute = minute ;
+		mAM_PM = c.get(Calendar.AM_PM) ;
+		
+		c.set(Calendar.YEAR, mYear) ;
+		c.set(Calendar.MONTH, mMonth) ;
+		c.set(Calendar.DAY_OF_MONTH, mDay) ;
+		c.set(Calendar.HOUR, mHour) ;
+		c.set(Calendar.MINUTE, mMinute) ;
+		c.set(Calendar.AM_PM, mAM_PM) ;
+		
+		timeStamp = c.getTimeInMillis() ;
+		
+		if(mAM_PM == 1)
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" AM")) ;
+		else 
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" PM")) ;
+		
+	}
+	
+	/*
+	 * Implementation of onSavedInstanceState() callback to deal with orientation change
+	 * so that values in views fields can be maintained while completing expense form 
+	 * */
 	
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		// TODO Auto-generated method stub
 		outState.putString(PAGE_HEADER, pageHeader.getText().toString());
-		outState.putString(EXPENSE_ID, ""+tagId) ;
+		outState.putString(EXPENSE_ID, new StringBuilder().append(tagId).toString()) ;
 		outState.putString(EXPENSE_TAG, expenseContent.getText().toString()) ;
 		outState.putString(EXPENSE_AMOUNT, amountExpense.getText().toString()) ;
-		outState.putString(POSITION_SPINNER, ""+choosedCategory.getSelectedItemPosition());
-		outState.putString(TIME_STAMP, ""+timeStamp) ;
+		outState.putString(POSITION_SPINNER, new StringBuilder().append(choosedCategory.getSelectedItemPosition()).toString());
+		outState.putString(TIME_STAMP, new StringBuilder().append(timeStamp).toString()) ;
 		
 		outState.putStringArrayList(CATEGORY_LIST, clist) ;
 		outState.putParcelableArrayList(CATEGORY_OBJECT_LIST, colist) ;
-		outState.putString(POSITION_LIST, ""+pos) ;
+		outState.putString(POSITION_LIST, new StringBuilder().append(pos).toString()) ;
 		super.onSaveInstanceState(outState);
-		
 		
 		
 	}
 
-
+/*
+ * This method is to populate spinner with all available categories
+ * 
+ * */
 
 	private void populateCategorySpinner(int posSpinner) {
 		// TODO Auto-generated method stub
 		if(posSpinner != -1)
 		{
-			cap = new CategoryArrayAdapter(this, android.R.layout.simple_list_item_1, clist);
-			cap.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+			
+			//when orientation change occurs then this is used to populate spinner
+			 
+			cap = new CategoryArrayAdapter(this, android.R.layout.simple_spinner_item, clist);
+			cap.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			choosedCategory.setAdapter(cap);
 			choosedCategory.setSelection(posSpinner) ;
 		}
 		else
 		{
-		developCategoryList();
-		cap = new CategoryArrayAdapter(this, android.R.layout.simple_list_item_1, clist);
-		cap.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-		choosedCategory.setAdapter(cap);
+			
+			 // When Activity is started first time
+			 
+			developCategoryList();
+			cap = new CategoryArrayAdapter(this, android.R.layout.simple_spinner_item, clist);
+			cap.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			choosedCategory.setAdapter(cap);
 		}
 		
 		
 	}
 	
 	
+	/*
+	 * This method is to initialize all views available in related xml layout of current activity
+	 * */
 	
 	private void initializeControls() {
 		// TODO Auto-generated method stub
@@ -168,69 +310,93 @@ public class ExpenseCompleteActivity extends Activity{
 		 expenseContent = (EditText)findViewById(R.id.expense_content) ;
 		 amountExpense = (EditText)findViewById(R.id.amount_expense);
 		 commitExpense = (Button)findViewById(R.id.commit_expense) ;
+		 expenseDate = (Button)findViewById(R.id.expense_date) ;
+		 expenseTime = (Button)findViewById(R.id.expense_time) ; 
+		  //To change date, implementing DatePicker
 		 
-		 
-		 
-		 addNewCategory.setOnClickListener(new  View.OnClickListener() {
-			
+		 expenseDate.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Intent i = new Intent();
-				i.setClass(ExpenseCompleteActivity.this, AddNewCategoryActivity.class);
-				startActivityForResult(i, GET_CATEGORY_CODE);
-				
+					
+				DatePickerDialog dpd = new DatePickerDialog(ExpenseCompleteActivity.this, mDListener, mYear, mMonth, mDay) ;
+				dpd.show() ;
 				
 			}
 		});
-		
+
+		  // To change Time, implementing TimePicker		 
+		 
+		 expenseTime.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+				TimePickerDialog tpd = new TimePickerDialog(ExpenseCompleteActivity.this, mTListener, mHour, mMinute, false) ;
+				tpd.show() ;
+			}
+		});
+		  		 
+		 //To add new category 
+		 
+		 addNewCategory.setOnClickListener(new  View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+			
+				Intent i = new Intent();
+				i.setClass(ExpenseCompleteActivity.this, AddNewCategoryActivity.class);
+				startActivityForResult(i, GET_CATEGORY_CODE); // Start activity to get new category		
+			}
+		});
+
+		 // To commit new expense in the database
 		
 		commitExpense.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				
-				
 				
 					posSpinner = choosedCategory.getSelectedItemPosition() ;
-					int cId = colist.get(posSpinner).getCategoryId() ;
+					int cId = colist.get(posSpinner).getCategoryId() ; // Extracting category Id of expense
 					String cName = colist.get(posSpinner).getCategoryName() ;
-					Log.v(TAG,"On commit, Category id is - "+cId+" , Category Name is - "+cName) ;			
-					String expenseTag = expenseContent.getText().toString() ;
-					Log.v(TAG,"On commit, Expense amount is " +amountExpense.getText().toString()) ;
+					//Log.v(TAG,"On commit, Category id is - "+cId+" , Category Name is - "+cName) ;			
+					String expenseTag = expenseContent.getText().toString().trim() ;
+				//	Log.v(TAG,"On commit, Expense amount is " +amountExpense.getText().toString()) ;	
+					String eAmt  = amountExpense.getText().toString().trim() ; // Trimming of fetched String value expense amount 
+					float expenseAmt = 0.0f ;
 					
-					String eAmt  = amountExpense.getText().toString().trim() ;
-					float expenseAmt = Float.parseFloat(eAmt) ;
+					if(eAmt.length() > 0)   
+						expenseAmt = Float.parseFloat(eAmt) ;
 					
-									
+				
+				if(expenseTag.length()>0 && eAmt.length() > 0) // checked to see whether all elements of form are filled 
+				{
+					
 					ExpenseDbAdapter edb = new ExpenseDbAdapter(ExpenseCompleteActivity.this) ;
 					edb.open();
-						if(timeStamp == -1){
-							Time t = new Time();
-							t.setToNow() ;
-							long timeStamp = t.toMillis(false);
-						
-						}
+					
 					long x = edb.insertExpense(expenseTag, expenseAmt, cId,timeStamp );
 					edb.close() ;
-						if(x!= -1)
+						if(x!= -1) // check to see if expense inserted successfully
 						{
-							Log.v(TAG,"Expense inserted successfully");
-							if(tagId != -1)
+							
+							//Log.v(TAG,"Expense inserted successfully");
+							if(tagId != -1) //check to see if inserted expense was tagged expense of not
 							{
+								 // If inserted expense was tagged expense then it is needed to be remove from
+								 // unreviewed expenses DB table
+								
 									UnreviewedExpenseDbAdapter udb = new UnreviewedExpenseDbAdapter(ExpenseCompleteActivity.this);
 									udb.open() ;
 									boolean r = udb.deleteExpenseTag(tagId);
 									udb.close();
 									if(r)
 									{
-										Log.v(TAG, "Deleted : Tagged Expense with id "+tagId);
+										//Log.v(TAG, "Deleted : Tagged Expense with id "+tagId);
 										Intent i = new Intent() ;
 										
-										i.putExtra(POSITION_LIST, pos) ;
-										setResult(RESULT_OK,i);
-										Log.v(TAG, "Result set has been done. List position "+pos);
+										i.putExtra(POSITION_LIST, pos) ; // Setting position of tagged expense in unreviewed tag list  
+										setResult(RESULT_OK,i);        // so that that expense can be removed from list
+																		// after returning result
+										//Log.v(TAG, "Result set has been done. List position "+pos);
 										finish() ;
 									}
 									else
@@ -257,32 +423,67 @@ public class ExpenseCompleteActivity extends Activity{
 						}
 					
 					
-					
-				}
+				}	
+				
+				
+			else
+			{
+				Toast.makeText(ExpenseCompleteActivity.this, "Complete Expense Details", Toast.LENGTH_SHORT).show() ;
+				
+			}
+				
+			
+			}
 		}) ;
 		
 	}
 
+	// Creation of Listener for DatePicker so that Date values can be updated	
+	private DatePickerDialog.OnDateSetListener  mDListener = new DatePickerDialog.OnDateSetListener() {
+		
+		@Override
+		public void onDateSet(DatePicker view, int year, int monthOfYear,
+				int dayOfMonth) {
+			// TODO Auto-generated method stub
+			updateDateValuesWithTimeStamp(year, monthOfYear, dayOfMonth) ;
+			
+		}
+	};
 	
-
+	
+	// Creation of Listener for TimePicker so that Time values can be updated
+	private TimePickerDialog.OnTimeSetListener mTListener = new TimePickerDialog.OnTimeSetListener() {
+		
+		@Override
+		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+			updateTimeValuesWithTimeStamp(hourOfDay, minute) ;
+		}
+	};
+	
+	
+	
+	/*
+	 * This callback is implemented to get new category and inserting new category into
+	 * category list DB table
+	 * */ 
+	
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode == GET_CATEGORY_CODE)
 		{
 			if(resultCode == RESULT_OK)
 			{
 				
-				String cname = data.getStringExtra(AddNewCategoryActivity.CATEGORY_NAME);
-				//pageHeader.setText(cname) ;
+				String cname = data.getStringExtra(AddNewCategoryActivity.CATEGORY_NAME);			
 				if(cname.length()>0)
 				{
 					CategoryDbAdapter cdb = new CategoryDbAdapter(ExpenseCompleteActivity.this);
 					cdb.open() ;
 					long x = cdb.insertCategory(cname);
 					if(x!= -1){
-						Log.v(TAG, "In onActivityResult, category inserted") ;
+						//Log.v(TAG, "In onActivityResult, category inserted") ;
 						ModifyCategoryList(cname);
 					}
 				}
@@ -295,12 +496,14 @@ public class ExpenseCompleteActivity extends Activity{
 		
 	}
 
-
+/*
+ * This method is used to modify the category listing in spinner when new category is inserted
+ * 
+ * */
 	private void ModifyCategoryList(String cname) {
-		// TODO Auto-generated method stub
-		if(colist.size() >=1 )
-		{
-			
+
+		if(colist.size() >=1 ) // If there is already some categories are available
+		{	 
 			CategoryObject cob = colist.get(colist.size()-1) ;
 			int id = cob.getCategoryId() + 1 ;
 			clist.add(cname) ;
@@ -311,10 +514,11 @@ public class ExpenseCompleteActivity extends Activity{
 			//choosedCategory.setSelection(choosedCategory.getLastVisiblePosition()) ;
 			choosedCategory.setSelection(s-1) ;
 		}
-		else if(colist.size() == 0 )
+		else if(colist.size() == 0 ) // If inserted category is first category
 		{
-			CategoryDbAdapter cdb = new CategoryDbAdapter(this) ;
-			cdb.open() ;
+			
+			  CategoryDbAdapter cdb = new CategoryDbAdapter(this) ;
+			  cdb.open() ;
 			  Cursor c = cdb.fetchAllCategories() ;
 			  c.moveToFirst() ;
 			  int cid = c.getInt(0);
@@ -329,9 +533,13 @@ public class ExpenseCompleteActivity extends Activity{
 		
 	}
 
+	
+	/*
+	 * To fill array list with categories available in database
+	 * 
+	 * */
 
 	private void developCategoryList() {
-		// TODO Auto-generated method stub
 		
 		colist = new ArrayList<CategoryObject>();
 		clist = new ArrayList<String>();

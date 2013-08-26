@@ -1,19 +1,18 @@
 package com.example.trex.listingunreviewedtags;
 
-import org.w3c.dom.Text;
-
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+/*
+ * A Class to hold all views of row layout of ListView of unreviewed expenses listing 
+ * 
+ * */
+
 public class ExpenseTagHolder {
 	
-	TextView expenseTag ;
+	TextView expenseTag,timeString, tagId, timeStamp, positionList ;
 	EditText amount ;
 	Button editExpense ;
-	TextView timeString ;
-	TextView tagId ;
-	TextView timeStamp ;
-	TextView positionList ;
 
 }

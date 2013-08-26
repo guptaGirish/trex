@@ -1,6 +1,9 @@
 package com.example.trex;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import com.example.trex.adapters.CategoryDbAdapter;
 import com.example.trex.adapters.ExpenseDbAdapter;
@@ -9,6 +12,8 @@ import com.example.trex.listingcategory.CategoryArrayAdapter;
 import com.example.trex.listingcategory.CategoryObject;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,77 +22,86 @@ import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 public class UpdateExpenseActivity extends Activity {
 
 	
-	String TAG = "UpdateExpenseActivity" ;
+	private String TAG = "UpdateExpenseActivity" ;
 
-	Button addNewCategory,updateExpense ;
-	EditText expenseContent, amountExpense ;
-	TextView pageHeader ;
-    Spinner choosedCategory ;
+	private Button addNewCategory,updateExpense, expenseDate, expenseTime  ;
+	private EditText expenseContent, amountExpense ;
+	private TextView pageHeader ;
+	private Spinner choosedCategory ;
     static int GET_CATEGORY_CODE = 2 ;
-    ArrayList<CategoryObject> colist ;
-    ArrayList<String> clist ;
-    CategoryArrayAdapter cap ;
-    long timeStamp = -1;
-    int tagId = -1 ;
+    private ArrayList<CategoryObject> colist ;
+    private ArrayList<String> clist ;
+    private CategoryArrayAdapter cap ;
+    long timeStamp ;
 	int pos = -1 ;
 	int posSpinner = -1 ;
 	int catId ;
-	int eid ;
+	int eid = -1 ;
 	 private String CATEGORY_LIST = "category_list" ;
 	 private String CATEGORY_OBJECT_LIST = "category_object_list" ;
+	 public static String POSITION_LIST = "position_in_settle_expenses_list" ;
 	public static String EXPENSE_TAG = "expense_tag" ;
     public static String EXPENSE_AMOUNT = "expense_amount" ;
     private static String POSITION_SPINNER = "position_spinner" ;
     public static String CAT_ID = "cat_id" ;
     public static String TIME_STAMP = "timestamp" ;
     public static String EXPENSE_ID = "id" ;
+    private int mYear, mMonth, mDay, mHour, mMinute, mAM_PM ;
 	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.actvity_expense_complete);
+		setContentView(R.layout.activity_expense_complete);
 		initializeControls();
 		
+		String eTag ;
+		Float eAmt ;
 		
 		if(savedInstanceState != null)
 		{
 			eid = Integer.parseInt(savedInstanceState.getString(EXPENSE_ID)) ;
-			String eTag = savedInstanceState.getString(EXPENSE_TAG) ;
-			float eAmt = Float.parseFloat(savedInstanceState.getString(EXPENSE_AMOUNT)) ;
+			timeStamp = Long.parseLong(savedInstanceState.getString(TIME_STAMP)) ;
+			pos = Integer.parseInt(savedInstanceState.getString(POSITION_LIST)) ;
+			//String
+			eTag = savedInstanceState.getString(EXPENSE_TAG) ;
+			//float 
+			eAmt = Float.parseFloat(savedInstanceState.getString(EXPENSE_AMOUNT)) ;
 			catId = Integer.parseInt(savedInstanceState.getString(CAT_ID)) ;
 			clist = (ArrayList<String>)savedInstanceState.getStringArrayList(CATEGORY_LIST) ;
 			colist = savedInstanceState.getParcelableArrayList(CATEGORY_OBJECT_LIST);
 			posSpinner = Integer.parseInt(savedInstanceState.getString(POSITION_SPINNER)) ;
-			ValuesAssignmentToControls(eTag,eAmt);
+			//ValuesAssignmentToControls(eTag,eAmt);
 			
 		}
 		else
 		{
 		
-		
-		
-		Intent i = getIntent() ;
-		eid = Integer.parseInt(i.getStringExtra(EXPENSE_ID)) ;
-		String eTag = i.getStringExtra(EXPENSE_TAG) ;
-		float eAmt = Float.parseFloat(i.getStringExtra(EXPENSE_AMOUNT)) ;
-		catId = Integer.parseInt(i.getStringExtra(CAT_ID)) ;
+				Intent i = getIntent() ;
+				eid = Integer.parseInt(i.getStringExtra(EXPENSE_ID)) ;
+				//String 
+				eTag = i.getStringExtra(EXPENSE_TAG) ;
+				//float 
+				eAmt = Float.parseFloat(i.getStringExtra(EXPENSE_AMOUNT)) ;
+				timeStamp = Long.parseLong(i.getStringExtra(TIME_STAMP));
+				pos = Integer.parseInt(i.getStringExtra(POSITION_LIST)) ;
+				catId = Integer.parseInt(i.getStringExtra(CAT_ID)) ;
+				//ValuesAssignmentToControls(eTag,eAmt);
+				
+		}
 		
 		ValuesAssignmentToControls(eTag,eAmt);
-		
-		
-		
-		
-		}
 		
 		
 	}
@@ -96,12 +110,113 @@ public class UpdateExpenseActivity extends Activity {
 		// TODO Auto-generated method stub
 		pageHeader.setText("Update Expense") ;
 		expenseContent.setText(eTag) ;
-		amountExpense.setText(""+eAmt) ; 
-		
+		amountExpense.setText(new StringBuilder().append(eAmt)) ; 
 		updateExpense.setText("Update");
 		populateCategorySpinner(posSpinner);
+		
+		updateDateValuesWithTimeStamp() ; // Update date String and values - mYear, mMonth, mDay 
+		updateTimeValuesWithTimeStamp() ; // Update time String and values - mHour, mMinute, mAM_PM
+		
 	}
 
+	
+	/*
+	 * This method is to update values related to Date 
+	 * 
+	 * */
+	
+	
+	private void updateDateValuesWithTimeStamp()
+	{
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		c.setTimeInMillis(timeStamp) ;
+		
+		mYear = c.get(Calendar.YEAR) ;
+		mMonth = c.get(Calendar.MONTH) ;
+		mDay = c.get(Calendar.DAY_OF_MONTH) ;
+		expenseDate.setText(new StringBuilder().append(mDay).append("/").append(mMonth+1).append("/").append(mYear)) ;
+		
+		
+	}
+	/*
+	 * This method is to update values related to Date
+	 * (called from DatePicker Listener's onDateSet() 
+	 * 
+	 * */
+	
+	
+	private void updateDateValuesWithTimeStamp(int year, int month, int day)
+	{
+		
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		mYear = year ;
+		mMonth = month ;
+		mDay = day ;
+		
+		c.set(Calendar.YEAR, mYear) ;
+		c.set(Calendar.MONTH, mMonth) ;
+		c.set(Calendar.DAY_OF_MONTH, mDay) ;
+		c.set(Calendar.HOUR, mHour) ;
+		c.set(Calendar.MINUTE, mMinute) ;
+		c.set(Calendar.AM_PM, mAM_PM) ;
+		
+		timeStamp = c.getTimeInMillis() ;
+		expenseDate.setText(new StringBuilder().append(mDay).append("/").append(mMonth+1).append("/").append(mYear)) ;
+			
+	}
+
+	/*
+	 * This method is to update values related to Date 
+	 * 
+	 * */	
+	private void updateTimeValuesWithTimeStamp()
+	{
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		c.setTimeInMillis(timeStamp) ;
+		
+		mHour = c.get(Calendar.HOUR) ;
+		mMinute = c.get(Calendar.MINUTE) ;
+		mAM_PM = c.get(Calendar.AM_PM) ;
+		
+		if(mAM_PM == 0)
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" AM")) ;
+		else 
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" PM")) ;
+					
+	}
+	/*
+	 * This method is to update values related to Date
+	 * (called from DatePicker Listener's onDateSet() 
+	 * 
+	 * */
+	
+	private void updateTimeValuesWithTimeStamp(int hourofday, int minute)
+	{
+		Calendar c = Calendar.getInstance(TimeZone.getDefault(),Locale.getDefault()) ;
+		c.set(Calendar.HOUR_OF_DAY,hourofday) ;
+		
+		mHour = c.get(Calendar.HOUR) ;
+		mMinute = minute ;
+		mAM_PM = c.get(Calendar.AM_PM) ;
+		
+		c.set(Calendar.YEAR, mYear) ;
+		c.set(Calendar.MONTH, mMonth) ;
+		c.set(Calendar.DAY_OF_MONTH, mDay) ;
+		c.set(Calendar.HOUR, mHour) ;
+		c.set(Calendar.MINUTE, mMinute) ;
+		c.set(Calendar.AM_PM, mAM_PM) ;
+		
+		timeStamp = c.getTimeInMillis() ;
+		
+		if(mAM_PM == 1)
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" AM")) ;
+		else 
+			expenseTime.setText(new StringBuilder().append(mHour).append(":").append(mMinute).append(" PM")) ;
+		
+	}
+	
+	
+	
 	private void initializeControls() {
 		// TODO Auto-generated method stub
 		
@@ -111,10 +226,32 @@ public class UpdateExpenseActivity extends Activity {
 		 expenseContent = (EditText)findViewById(R.id.expense_content) ;
 		 amountExpense = (EditText)findViewById(R.id.amount_expense);
 		 updateExpense = (Button)findViewById(R.id.commit_expense) ;
+		 expenseDate = (Button)findViewById(R.id.expense_date) ;
+		 expenseTime = (Button)findViewById(R.id.expense_time) ;
 		 
 		 
-		
+//To change date, implementing DatePicker
 		 
+		 expenseDate.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+					
+				DatePickerDialog dpd = new DatePickerDialog(UpdateExpenseActivity.this, mDListener, mYear, mMonth, mDay) ;
+				dpd.show() ;
+				
+			}
+		});
+
+		  // To change Time, implementing TimePicker		 
+		 
+		 expenseTime.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+				TimePickerDialog tpd = new TimePickerDialog(UpdateExpenseActivity.this, mTListener, mHour, mMinute, false) ;
+				tpd.show() ;
+			}
+		});
 		 
 		 addNewCategory.setOnClickListener(new  View.OnClickListener() {
 			
@@ -134,36 +271,47 @@ public class UpdateExpenseActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				
 				posSpinner = choosedCategory.getSelectedItemPosition() ;
 				int cId = colist.get(posSpinner).getCategoryId() ;
 				String cName = colist.get(posSpinner).getCategoryName() ;
-				Log.v(TAG,"On commit, Category id is - "+cId+" , Category Name is - "+cName) ;			
+				//Log.v(TAG,"On commit, Category id is - "+cId+" , Category Name is - "+cName) ;			
 				String expenseTag = expenseContent.getText().toString() ;
-				float expenseAmt = Float.parseFloat(amountExpense.getText().toString()) ;
 				
-								
-				ExpenseDbAdapter edb = new ExpenseDbAdapter(UpdateExpenseActivity.this) ;
-				edb.open();
-				Time t = new Time();
-				t.setToNow() ;
-				long timeStamp = t.toMillis(false);
+				String eAmt  = amountExpense.getText().toString().trim() ; // Trimming of fetched String value expense amount 
+				float expenseAmt = 0.0f ;
 				
-				ContentValues updatedValues = new ContentValues() ;
-				updatedValues.put(ExpenseDbAdapter.CATEGORY_ID,cId) ;
-				updatedValues.put(ExpenseDbAdapter.TIME_STAMP, timeStamp) ;
-				updatedValues.put(ExpenseDbAdapter.ETAG, expenseTag) ;
-				updatedValues.put(ExpenseDbAdapter.AMOUNT, expenseAmt) ;
-				boolean result = edb.updateExpense(eid, updatedValues) ;
-				if(result)
+				if(eAmt.length() > 0)   
+					expenseAmt = Float.parseFloat(eAmt) ;
+				
+				if(expenseTag.length() > 0 && eAmt.length() > 0) // checked to see whether all elements of form are filled 
 				{
-					Toast.makeText(UpdateExpenseActivity.this, "Expense Updated Successfully", Toast.LENGTH_SHORT).show() ;
-					setResult(RESULT_OK) ;
-					finish();
-					
+								
+						ExpenseDbAdapter edb = new ExpenseDbAdapter(UpdateExpenseActivity.this) ;
+						edb.open();
+								
+						ContentValues updatedValues = new ContentValues() ;
+						updatedValues.put(ExpenseDbAdapter.CATEGORY_ID,cId) ;
+						updatedValues.put(ExpenseDbAdapter.TIME_STAMP, timeStamp) ;
+						updatedValues.put(ExpenseDbAdapter.ETAG, expenseTag) ;
+						updatedValues.put(ExpenseDbAdapter.AMOUNT, expenseAmt) ;
+						boolean result = edb.updateExpense(eid, updatedValues) ;
+						if(result)
+						{
+							Toast.makeText(UpdateExpenseActivity.this, "Expense Updated Successfully", Toast.LENGTH_SHORT).show() ;
+							setResult(RESULT_OK) ;
+							finish();
+							
+							
+						}
+						
+				}
+				else
+				{
+					Toast.makeText(UpdateExpenseActivity.this, "Complete Expense Details", Toast.LENGTH_SHORT).show() ;
 					
 				}
+				
 				
 			}
 		}) ;
@@ -177,21 +325,21 @@ public class UpdateExpenseActivity extends Activity {
 		// TODO Auto-generated method stub
 		if(posSpinner != -1)
 		{
-			cap = new CategoryArrayAdapter(this, android.R.layout.simple_list_item_1, clist);
-			cap.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+			cap = new CategoryArrayAdapter(this, android.R.layout.simple_spinner_item, clist);
+			cap.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			choosedCategory.setAdapter(cap);
 			choosedCategory.setSelection(posSpinner) ;
 		}
 		else
 		{
-		int positionInSpinner =  developCategoryList();
-		cap = new CategoryArrayAdapter(this, android.R.layout.simple_list_item_1, clist);
-		cap.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-		choosedCategory.setAdapter(cap);
-		posSpinner = positionInSpinner ;
-		Log.v(TAG,"In populateCategorySpinner, posSpinner is - "+ posSpinner);
-		
-		choosedCategory.setSelection(posSpinner) ;
+			int positionInSpinner =  developCategoryList();
+			cap = new CategoryArrayAdapter(this, android.R.layout.simple_spinner_item, clist);
+			cap.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			choosedCategory.setAdapter(cap);
+			posSpinner = positionInSpinner ;
+			//Log.v(TAG,"In populateCategorySpinner, posSpinner is - "+ posSpinner);
+			
+			choosedCategory.setSelection(posSpinner) ;
 		}
 		
 		
@@ -201,24 +349,47 @@ public class UpdateExpenseActivity extends Activity {
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
+
 //		outState.putString(PAGE_HEADER, pageHeader.getText().toString());
-		outState.putString(EXPENSE_ID, ""+eid) ;
+		outState.putString(EXPENSE_ID, new StringBuilder().append(eid).toString()) ;
 		outState.putString(EXPENSE_TAG, expenseContent.getText().toString()) ;
 		outState.putString(EXPENSE_AMOUNT, amountExpense.getText().toString()) ;
-		outState.putString(POSITION_SPINNER, ""+choosedCategory.getSelectedItemPosition());
-		//outState.putString(TIME_STAMP, ""+timeStamp) ;
-		outState.putString(CAT_ID, ""+catId) ;
+		outState.putString(POSITION_SPINNER,new StringBuilder().append(choosedCategory.getSelectedItemPosition()).toString());
+		outState.putString(TIME_STAMP,new StringBuilder().append(timeStamp).toString()) ;
+		outState.putString(CAT_ID, new StringBuilder().append(catId).toString()) ;
 		outState.putStringArrayList(CATEGORY_LIST, clist) ;
 		outState.putParcelableArrayList(CATEGORY_OBJECT_LIST, colist) ;
-	//	outState.putString(POSITION_LIST, ""+pos) ;
+		outState.putString(POSITION_LIST, new StringBuilder().append(pos).toString()) ;
 		super.onSaveInstanceState(outState);
 		
 		
 		
 	}
 
-	
+	// Creation of Listener for DatePicker so that Date values can be updated	
+		private DatePickerDialog.OnDateSetListener  mDListener = new DatePickerDialog.OnDateSetListener() {
+			
+			@Override
+			public void onDateSet(DatePicker view, int year, int monthOfYear,
+					int dayOfMonth) {
+				// TODO Auto-generated method stub
+				updateDateValuesWithTimeStamp(year, monthOfYear, dayOfMonth) ;
+				
+			}
+		};
+		
+		
+		// Creation of Listener for TimePicker so that Time values can be updated
+		private TimePickerDialog.OnTimeSetListener mTListener = new TimePickerDialog.OnTimeSetListener() {
+			
+			@Override
+			public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+				// TODO Auto-generated method stub
+				updateTimeValuesWithTimeStamp(hourOfDay, minute) ;
+			}
+		};
+		
+		
 	
 	
 	@Override
@@ -237,7 +408,7 @@ public class UpdateExpenseActivity extends Activity {
 					cdb.open() ;
 					long x = cdb.insertCategory(cname);
 					if(x!= -1){
-						Log.v(TAG, "In onActivityResult, category inserted") ;
+						//Log.v(TAG, "In onActivityResult, category inserted") ;
 						ModifyCategoryList(cname);
 					}
 				}

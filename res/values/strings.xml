@@ -15,5 +15,10 @@
     <string name="new_category_name">Enter New Category Name</string>
     <string name="add_category">Add</string>
     <string name="cancel">Cancel</string>
+    <string name="time">Time</string>
+    <string name="date">Date</string>
+    <string name="add_expense_tag_hint">Add Expense Tag</string>
+    <string name="add_tag">Add Tag</string>
+    <string name="commit_expense">commit</string>
 
 </resources>
